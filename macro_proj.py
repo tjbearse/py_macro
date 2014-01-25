@@ -8,7 +8,9 @@ class App():
 	def __init__(self):
 		self.root = tk.Tk()
 		self.initUI()
-
+		self.initControlDialog()
+		self.root.mainloop()
+		
 	def initUI(self):
 		#Top-Left
 		tk.Frame(width=10, height=10).grid(row=0)
@@ -54,11 +56,33 @@ class App():
 		self.runBtn.grid(row=7, column=8)
 
 		tk.Frame(height=10).grid(row=8)
-		self.root.mainloop()
-
-
-	def addCntrl(self):
 		
+	def initControlDialog(self):
+		self.box = tk.Toplevel(master=self.root)
+		self.box.protocol("WM_DELETE_WINDOW", self.hideControlDialog)
+		
+		row_n=0
+		col_n=0
+		listbox = tk.Listbox(master=self.box)
+		for btn in sorted(list(VK_CODE.keys())):
+			listbox.insert(tk.END, btn)
+			#button = tk.Button(master=self.box, text=btn)
+			#button.grid(row=row_n, column=col_n)
+			#col_n = int(col_n + 1) % 5
+			#row_n += int(col_n / 4)
+		listbox.pack()
+		
+		button = tk.Button(master=self.box, text="OK", command=self.insertFromDialog)
+		button.pack()
+		
+	def hideControlDialog(self):
+		print("hide")
+		
+	def addCntrl(self):
+		print("show")
+		
+	def insertFromDialog(self):
+		print("insert from dialog")
 		
 	def insert(self):
 		text = self.stringEntry.get()
@@ -277,7 +301,4 @@ def keyUp(val):
 def keyDown(val):
 	print ('d'+str(val))
 	
-
-	
-app=App()
-app.mainloop()
+app = App()
