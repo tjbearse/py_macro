@@ -18,54 +18,19 @@ class App():
 		#spacer
 		tk.Frame(width=10, height=10).grid(row=0)
 		
+		
 		#text input for creating a task item
-		self.stringEntry = tk.Entry(self.root)
-		self.stringEntry.grid(row=2, column=1, columnspan=2)
+		self.stringEntry = tk.Text(self.root, height = 8, width = 30)
+		self.stringEntry.grid(row=1, column=1, columnspan=8)
+		
 		
 		#Button to pop up Control Char menu
 		self.ctrlBtn = tk.Button(self.root, text="Add Control Char", command=self.addCntrl)
 		self.ctrlBtn.grid(row=3, column=1, columnspan=2)
 		
-		#
-		#Top-Middle
-		#
-		
-		#spacer
-		tk.Frame(width=10).grid(row=0, column=3)
 
-		#Button that moves item in visual list up
-		self.upBtn = tk.Button(self.root, text="Up", command=self.up)
-		self.upBtn.grid(row=2, column=4)
-
-		#Button that moves item in visual list down
-		self.downBtn = tk.Button(self.root, text="Down", command=self.down)
-		self.downBtn.grid(row=3, column=4)
-		
-		#Button, moves workspace string into the list
-		self.insertBtn = tk.Button(self.root, text=">>", command=self.insert)
-		self.insertBtn.grid(row=4, column=4)
-		
-		#Button, moves active list string to the workspace
-		self.removeBtn = tk.Button(self.root, text="<<", command=self.remove)
-		self.removeBtn.grid(row=5, column=4)
-		
-		#
-		#Top-Right
-		#
-		
-		#spacer
-		tk.Frame(width=10).grid(row=0, column=5)
-
-		#visual list of task items
-		self.listbox = tk.Listbox(self.root)
-		self.listbox.grid(row=1, rowspan=5, column=6, columnspan=3, sticky=tk.N)
-
-		#spacer
-		tk.Frame(width=10, height=10).grid(row=6, column=9)
-
-		#
-		#Bottom-left
-		#
+		#Bottom
+		#Left
 		
 		#Task Repeat count
 		tk.Label(self.root, text="Repeat:").grid(row=7, column=1)
@@ -85,23 +50,25 @@ class App():
 		#Bottom-Right
 		#
 		
+		tk.Frame(width=10).grid(row=7, column = 7)
+		
 		#Run Button
 		self.runBtn = tk.Button(self.root, text="Run", command=self.start)
 		self.runBtn.grid(row=7, column=8)
 
-		tk.Frame(height=10).grid(row=8)
+		tk.Frame(height=10, width=10).grid(row=8, column = 9)
 	
 	# create the control buttons dialog
 	# this is to input control sequences into workspace
-	def initControlDialog(self):
-		self.box = tk.Toplevel(master=self.root)
+	def initControlDialog(self): # TODO: rename to mod
+		self.mod_box = tk.Toplevel(master=self.root)
 		
 		# don't close this, only want to hide it
-		self.box.protocol("WM_DELETE_WINDOW", self.hideControlDialog)
+		self.mod_box.protocol("WM_DELETE_WINDOW", self.hideControlDialog)
 		
 		row_n=0
 		col_n=0
-		listbox = tk.Listbox(master=self.box)
+		listbox = tk.Listbox(master=self.mod_box)
 		for btn in sorted(list(VK_CODE.keys())):
 			listbox.insert(tk.END, btn)
 			#button = tk.Button(master=self.box, text=btn)
@@ -110,50 +77,24 @@ class App():
 			#row_n += int(col_n / 4)
 		listbox.pack()
 		
-		button = tk.Button(master=self.box, text="OK", command=self.insertFromDialog)
+		button = tk.Button(master=self.mod_box, text="OK", command=self.insertFromDialog)
 		button.pack()
 		
-	#
+		self.mod_box.withdraw();
+		
+	# hide the modifiers box
 	def hideControlDialog(self):
-		print("hide")
+		self.mod_box.withdraw();
 	
 	# pop up the control dialog so user can select a btn to insert
 	def addCntrl(self):
-		print("show")
+		self.mod_box.update();
+		self.mod_box.deiconify();
 		
-	# user selects
+	
 	def insertFromDialog(self):
 		print("insert from dialog")
 		
-	def insert(self):
-		text = self.stringEntry.get()
-		if( len(text) != 0 ):
-			self.stringEntry.delete(0, tk.END)
-			self.listbox.insert(tk.END, text)
-			self.listbox.see(tk.END)
-		
-	def remove(self):
-		text = self.listbox.get(self.listbox.index(tk.ACTIVE))
-		self.listbox.delete(self.listbox.index(tk.ACTIVE))
-
-		self.stringEntry.delete(0, tk.END);
-		self.stringEntry.insert(tk.END, text);
-		
-	def up(self):
-		index = self.listbox.index(tk.ACTIVE)
-		if(index != 0 and self.listbox.size() != 1):
-			text = self.listbox.get(index)
-			self.listbox.delete(index)
-			self.listbox.insert(index-1, text)
-			self.listbox.activate(index-1)
-			
-	def down(self):
-		index = self.listbox.index(tk.ACTIVE)
-		if(index != self.listbox.index(tk.END) and self.listbox.size() != 1):
-			text = self.listbox.get(index)
-			self.listbox.delete(index)
-			self.listbox.insert(index+1, text)
-			self.listbox.activate(index+1)
 			
 	def start(self):
 		self.count = int(self.countDownSpinbox.get())+1;
