@@ -16,8 +16,7 @@ class EditableTextListCtrl(wx.ListCtrl, TextEditMixin):
 		self.Bind(wx.EVT_LIST_END_LABEL_EDIT, self.OnModified, self)
 
 	def InsertNew(self, index=-1):
-		print 'inserting new'
-		assert(index < self.GetItemCount() and index >= -1)
+		assert(index <= self.GetItemCount() and index >= -1)
 		if(index == -1):
 			pos = self.InsertStringItem(0, '1');			
 		else:
@@ -26,7 +25,7 @@ class EditableTextListCtrl(wx.ListCtrl, TextEditMixin):
 						
 	# Event Handlers
 	def OnModified(self, event):
-		print event.GetColumn(), ' ', event.GetText()
+		print "modified: ", event.GetColumn(), ' ', event.GetText()
 		
 		
 class MainFrame(wx.Frame):
@@ -44,14 +43,11 @@ class MainFrame(wx.Frame):
 	
 	# Initialize the list of sequences to run
 	def InitScriptList(self):
-		self.scriptList = EditableTextListCtrl(self, wx.ID_ANY, style=wx.LC_REPORT | wx.LC_EDIT_LABELS | wx.LC_VRULES | wx.LC_HRULES)
-		self.scriptList.Show(True)
-		
+		self.scriptList = EditableTextListCtrl(self, wx.ID_ANY, style=wx.LC_REPORT | wx.LC_EDIT_LABELS | wx.LC_VRULES | wx.LC_HRULES)		
 		self.scriptList.InsertColumn(0, "Repetitions")
 		self.scriptList.InsertColumn(1, "Sequence")
 		self.scriptList.InsertNew()
-	
-	
+		
 	def InitMenu(self):
 		self.CreateStatusBar()
 		
@@ -63,7 +59,8 @@ class MainFrame(wx.Frame):
 		
 		editmenu = wx.Menu()
 		menuInsert = editmenu.Append(wx.ID_ANY, "&Insert", "Insert a row at the end of the list")
-		menuInsertAbove = editmenu.Append(wx.ID_ANY, "Insert &Above", "Insert a row above the selected row")
+		menuInsertAbove = editmenu.Append(wx.ID_ANY, "Insert &Above", "Insert a row above the selected row(s)")
+		menuInsertBelow = editmenu.Append(wx.ID_ANY, "Insert &Below", "Insert a row below the selected row(s)")
 		
 		menuBar = wx.MenuBar()
 		menuBar.Append(filemenu, "&File")
@@ -75,13 +72,11 @@ class MainFrame(wx.Frame):
 	
 		self.Bind(wx.EVT_MENU, self.OnInsert, menuInsert)
 		self.Bind(wx.EVT_MENU, self.OnInsertAbove, menuInsertAbove)
-		
+		self.Bind(wx.EVT_MENU, self.OnInsertBelow, menuInsertBelow)
 	
 	
-		# self.Show(True)
 		
 		'''
-		#TODO: how to replicate grid 
 		tk.Frame(width=10, height=10).grid(row=0)
 		
 		
@@ -126,13 +121,17 @@ class MainFrame(wx.Frame):
 		'''
 		
 	'''
-	Events
+	Menu Events
 	'''
 	def OnInsert(self, e):
 		self.scriptList.InsertNew()
 		
 	def OnInsertAbove(self, e):
 		index = self.scriptList.GetFirstSelected()
+		self.scriptList.InsertNew(index)
+		
+	def OnInsertBelow(self, e):
+		index = self.scriptList.GetFirstSelected() + self.scriptList.GetSelectedItemCount()
 		self.scriptList.InsertNew(index)
 		
 	def OnAbout(self, e):
