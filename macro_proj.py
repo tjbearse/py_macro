@@ -16,13 +16,17 @@ class EditableTextListCtrl(wx.ListCtrl, TextEditMixin):
 		self.Bind(wx.EVT_LIST_END_LABEL_EDIT, self.OnModified, self)
 
 	def InsertNew(self, index=-1):
-		assert(index <= self.GetItemCount() and index >= -1)
-		if(index == -1):
+		assert(-1 <= index <= self.GetItemCount())
+		if index == -1:
 			pos = self.InsertStringItem(0, '1');			
 		else:
 			pos = self.InsertStringItem(index, '1');
 		self.SetStringItem(pos, 1, '');
-						
+
+	def Delete(self, index):
+		assert(0 <= index <= self.GetItemCount())
+		pos = self.DeleteItem(index)
+
 	# Event Handlers
 	def OnModified(self, event):
 		print "modified: ", event.GetColumn(), ' ', event.GetText()
@@ -58,9 +62,16 @@ class MainFrame(wx.Frame):
 		menuExit = filemenu.Append(wx.ID_EXIT, "E&xit", " Close the program")
 		
 		editmenu = wx.Menu()
-		menuInsert = editmenu.Append(wx.ID_ANY, "&Insert", "Insert a row at the end of the list")
-		menuInsertAbove = editmenu.Append(wx.ID_ANY, "Insert &Above", "Insert a row above the selected row(s)")
-		menuInsertBelow = editmenu.Append(wx.ID_ANY, "Insert &Below", "Insert a row below the selected row(s)")
+		insertmenu = wx.Menu()
+		
+		menu_insert_top = insertmenu.Append(wx.ID_ANY, "&Top", "Insert a row at the top of the list")
+		menu_insert_bottom = insertmenu.Append(wx.ID_ANY, "&Bottom", "Insert a row at the bottom of the list")
+		menu_insert_above = insertmenu.Append(wx.ID_ANY, "&Above Selected", "Insert a row above the selected row(s)")
+		menu_insert_below = insertmenu.Append(wx.ID_ANY, "B&elow Selected", "Insert a row below the selected row(s)")
+		
+		editmenu.AppendMenu(wx.ID_ANY, "&Insert", insertmenu)
+		
+		menuDelete = editmenu.Append(wx.ID_ANY, "&Delete", "Delete selected row(s)")
 		
 		menuBar = wx.MenuBar()
 		menuBar.Append(filemenu, "&File")
@@ -70,11 +81,12 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
 		self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
 	
-		self.Bind(wx.EVT_MENU, self.OnInsert, menuInsert)
-		self.Bind(wx.EVT_MENU, self.OnInsertAbove, menuInsertAbove)
-		self.Bind(wx.EVT_MENU, self.OnInsertBelow, menuInsertBelow)
+		self.Bind(wx.EVT_MENU, self.OnInsertTop, menu_insert_top)
+		self.Bind(wx.EVT_MENU, self.OnInsertBottom, menu_insert_bottom)
+		self.Bind(wx.EVT_MENU, self.OnInsertAbove, menu_insert_above)
+		self.Bind(wx.EVT_MENU, self.OnInsertBelow, menu_insert_below)
 	
-	
+		self.Bind(wx.EVT_MENU, self.OnDelete, menuDelete)
 		
 		'''
 		tk.Frame(width=10, height=10).grid(row=0)
@@ -123,8 +135,11 @@ class MainFrame(wx.Frame):
 	'''
 	Menu Events
 	'''
-	def OnInsert(self, e):
+	def OnInsertBottom(self, e):
 		self.scriptList.InsertNew()
+		
+	def OnInsertTop(self, e):
+		self.scriptList.InsertNew(0)
 		
 	def OnInsertAbove(self, e):
 		index = self.scriptList.GetFirstSelected()
@@ -133,6 +148,13 @@ class MainFrame(wx.Frame):
 	def OnInsertBelow(self, e):
 		index = self.scriptList.GetFirstSelected() + self.scriptList.GetSelectedItemCount()
 		self.scriptList.InsertNew(index)
+		
+	def OnDelete(self, e):
+		index = self.scriptList.GetFirstSelected()
+		for x in xrange(self.scriptList.GetSelectedItemCount()):
+			self.scriptList.Delete(index)
+		if self.scriptList.GetItemCount() == 0:
+			self.scriptList.InsertNew()
 		
 	def OnAbout(self, e):
 		# TODO: about text
