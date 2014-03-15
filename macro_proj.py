@@ -149,13 +149,15 @@ class MainFrame(wx.Frame):
 		innerbox = wx.BoxSizer(wx.HORIZONTAL)
 		
 		innerbox.Add(self.repeat_label, proportion=0, 
-					flag=wx.LEFT | wx.RIGHT | wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
+					flag=wx.LEFT | wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
+					border=10)
 		innerbox.Add(self.repeat_ctrl, proportion=0,
 					flag=wx.LEFT | wx.RIGHT | wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
 					border=10)
 		
 		innerbox.Add(self.delay_label, proportion=0,
-					flag=wx.LEFT | wx.RIGHT | wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
+					flag=wx.LEFT | wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
+					border=10)
 		innerbox.Add(self.delay_ctrl, proportion=0,
 					flag=wx.LEFT | wx.RIGHT | wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
 					border=10)
@@ -166,7 +168,7 @@ class MainFrame(wx.Frame):
 		outerbox = wx.BoxSizer(wx.VERTICAL)
 		
 		outerbox.Add(innerbox, flag=wx.ALIGN_LEFT | wx.ALIGN_RIGHT)
-		outerbox.Add(self.scriptList, proportion=2, flag=wx.EXPAND | wx.ALL ^ wx.BOTTOM,
+		outerbox.Add(self.scriptList, proportion=2, flag=wx.EXPAND | wx.ALL,
 					border=10)
 		self.panel.SetSizer(outerbox)
 		
@@ -174,6 +176,7 @@ class MainFrame(wx.Frame):
 	Menu Events
 	'''
 	def OnInsertBottom(self, e):
+		print self.scriptList.GetEditControl()
 		self.scriptList.InsertNew()
 		
 	def OnInsertTop(self, e):
