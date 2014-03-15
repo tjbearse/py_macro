@@ -25,7 +25,7 @@ class EditableTextListCtrl(wx.ListCtrl, TextEditMixin):
 
 	def Delete(self, index):
 		assert(0 <= index <= self.GetItemCount())
-		pos = self.DeleteItem(index)
+		self.DeleteItem(index)
 
 	# Event Handlers
 	def OnModified(self, event):
@@ -35,23 +35,17 @@ class EditableTextListCtrl(wx.ListCtrl, TextEditMixin):
 class MainFrame(wx.Frame):
 	def __init__(self, parent, title):
 		wx.Frame.__init__(self, parent, title=title, size=(400, 350))
-		
-		self.InitUI()
-		self.initControlDialog()
+		self.panel = wx.Panel(self, wx.ID_ANY)
 
-	
-	# initialize the main window's UI elements
-	def InitUI(self):
 		self.InitMenu()
 		self.InitScriptList()
+		self.InitButtons()
+		self.Panelize()
+		
+		self.panel.Fit()
+		self.Fit()
 	
 	# Initialize the list of sequences to run
-	def InitScriptList(self):
-		self.scriptList = EditableTextListCtrl(self, wx.ID_ANY, style=wx.LC_REPORT | wx.LC_EDIT_LABELS | wx.LC_VRULES | wx.LC_HRULES)		
-		self.scriptList.InsertColumn(0, "Repetitions")
-		self.scriptList.InsertColumn(1, "Sequence")
-		self.scriptList.InsertNew()
-		
 	def InitMenu(self):
 		self.CreateStatusBar()
 		
@@ -131,6 +125,50 @@ class MainFrame(wx.Frame):
 
 		tk.Frame(height=10, width=10).grid(row=8, column=9)
 		'''
+		
+	def InitScriptList(self):
+		self.scriptList = EditableTextListCtrl(self.panel, wx.ID_ANY, style=wx.LC_REPORT | wx.LC_EDIT_LABELS | wx.LC_VRULES | wx.LC_HRULES)		
+		self.scriptList.InsertColumn(0, "Repetitions")
+		self.scriptList.InsertColumn(1, "Sequence")
+		self.scriptList.InsertNew()
+		self.scriptList.Fit()
+			
+	def InitButtons(self):
+		self.repeat_label = wx.StaticText(self.panel, label='Repeat')
+		self.repeat_ctrl = wx.SpinCtrl(self.panel, initial=1, size=(50, -1))
+		self.repeat_ctrl.SetToolTipString('repeat entire sequence')
+		
+		self.delay_label = wx.StaticText(self.panel, label='Delay')
+		self.delay_ctrl = wx.SpinCtrl(self.panel, initial=3, size=(50, -1))
+		self.delay_ctrl.SetToolTipString('set run delay')
+		
+		self.run_btn = wx.Button(self.panel, label='Run')
+		self.run_btn.SetToolTipString('click to run macro')
+		
+	def Panelize(self):
+		innerbox = wx.BoxSizer(wx.HORIZONTAL)
+		
+		innerbox.Add(self.repeat_label, proportion=0, 
+					flag=wx.LEFT | wx.RIGHT | wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
+		innerbox.Add(self.repeat_ctrl, proportion=0,
+					flag=wx.LEFT | wx.RIGHT | wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
+					border=10)
+		
+		innerbox.Add(self.delay_label, proportion=0,
+					flag=wx.LEFT | wx.RIGHT | wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
+		innerbox.Add(self.delay_ctrl, proportion=0,
+					flag=wx.LEFT | wx.RIGHT | wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
+					border=10)
+		
+		innerbox.Add(self.run_btn, proportion=0, flag=wx.LEFT | wx.RIGHT | wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
+					border=10)
+		
+		outerbox = wx.BoxSizer(wx.VERTICAL)
+		
+		outerbox.Add(innerbox, flag=wx.ALIGN_LEFT | wx.ALIGN_RIGHT)
+		outerbox.Add(self.scriptList, proportion=2, flag=wx.EXPAND | wx.ALL ^ wx.BOTTOM,
+					border=10)
+		self.panel.SetSizer(outerbox)
 		
 	'''
 	Menu Events
