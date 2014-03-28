@@ -8,12 +8,26 @@ class Pymacro(wx.App):
 		self.SetTopWindow(frame)
 		return True
 
+
+
+# holds text and repetition count
+class KeySequenceHolder(object):
+	def __init__(self, rep, text):
+		self.repeat = int(rep)
+		self.text = text
+		
+		
 class SequenceListCtrl(wx.ListCtrl, TextEditMixin):
 	"""List style control for editing and displaying sequences of keys to run"""
 	def __init__(self, parent, ID, pos=wx.DefaultPosition,
 				size=wx.DefaultSize, style=0):
-		wx.ListCtrl.__init__(self, parent, ID, pos, size, style)
+		wx.ListCtrl.__init__(self, parent, ID, pos, size, style | wx.LC_VIRTUAL)
 		TextEditMixin.__init__(self) 
+				
+		self.sequences = [[]]
+		
+		self.SetItemCount(0)
+		
 		self.Bind(wx.EVT_LIST_END_LABEL_EDIT, self.OnModified, self)
 
 	''' methods '''
@@ -21,9 +35,9 @@ class SequenceListCtrl(wx.ListCtrl, TextEditMixin):
 		"""Inserts a new row, initialized to repeat=1 and blank sequence.
 			rows are zero indexed
 		"""
-		assert(0 <= index <= self.GetItemCount())
-		pos = self.InsertStringItem(index, '1');
-		self.SetStringItem(pos, 1, '');
+		assert(0 <= index <= len(self.sequences))
+		self.sequences.insert(index, ())
+		self.SetItemCount(len(self.sequences))
 
 	def Delete(self, index):
 		"""Deletes the specified row (zero indexed)"""
@@ -33,6 +47,17 @@ class SequenceListCtrl(wx.ListCtrl, TextEditMixin):
 	'''Event Handlers'''
 		
 	def OnModified(self, event):
+		#validate
+		if event.GetColumn() == 1 :
+			try:
+				interp = Parse(event.GetText())
+				if interp is not None :
+					event.Allow()
+					#TODO: update sequence here
+				else:
+					event.Veto()
+			except ParseException:
+				event.Veto()
 		print "modified: ", event.GetColumn(), ' ', event.GetText()
 		
 		
@@ -112,6 +137,7 @@ class PymacroMainFrame(wx.Frame):
 		'''Run'''
 		self.run_btn = wx.Button(self.panel, label='Run')
 		self.run_btn.SetToolTipString('click to run macro')
+		self.run_btn.Bind(wx.EVT_BUTTON, self.OnRun, self)
 		
 	def Panelize(self):
 		""" Arranges all elements in the main panel of the window """
@@ -169,7 +195,7 @@ class PymacroMainFrame(wx.Frame):
 	def OnDelete(self, e):
 		""" Deletes the selected rows """
 		index = self.scriptList.GetFirstSelected()
-		for x in xrange(self.scriptList.GetSelectedItemCount()):
+		for usused in xrange(self.scriptList.GetSelectedItemCount()):
 			self.scriptList.Delete(index)
 		if self.scriptList.GetItemCount() == 0:
 			self.scriptList.InsertNew()
@@ -182,6 +208,13 @@ class PymacroMainFrame(wx.Frame):
 	def OnExit(self, e):
 		self.Close(True)
 	
+	'''
+	Other Event Handlers
+	'''
+	
+	def OnRun(self, e):
+		''
+		
 	# create the control buttons dialog
 	# this is to input control sequences into workspace
 	def initControlDialog(self):  # TODO: rename to mod

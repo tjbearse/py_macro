@@ -28,7 +28,7 @@ class MouseInput(Structure):
     MoveNoCoalesce = 0x2000
     
     LDown = 0x0002
-    LUP = 0x0004
+    LUp = 0x0004
     RDown = 0x008
     RUp = 0x0010
     MDown = 0x0008  # mid
@@ -69,16 +69,20 @@ class Input(Structure):
     KeyBoard = 1
     Hardward = 2
     
-sleep(2)
-FInputs = Input * 3
-extra = c_ulong(0)
-
-move = InputU()
-move.mi = MouseInput(100, 100, 0, MouseInput.Move, 0, pointer(extra))
-click = InputU()
-click.mi = MouseInput(0, 0, 0, MouseInput.RDown, 0, pointer(extra))
-release = InputU()
-release.mi = MouseInput(0, 0, 0, MouseInput.RUp, 0, pointer(extra))
-
-x = FInputs((Input.Mouse, move), (Input.Mouse, click), (Input.Mouse, release))
-user32.SendInput(3, pointer(x), sizeof(x[0]))
+# SAMPLE CODE
+#
+# sleep(2)
+# FInputs = Input * 4
+# extra = c_ulong(0)
+#  
+#  
+# click = InputU()
+# click.mi = MouseInput(0, 0, 0, MouseInput.LDown, 0, pointer(extra))
+# release = InputU()
+# release.mi = MouseInput(0, 0, 0, MouseInput.LUp, 0, pointer(extra))
+# keyD = InputU()
+# keyD.ki = KeyBdInput(ord('A'), 0, 0, 0, pointer(extra))
+# keyU = InputU()
+# keyU.ki = KeyBdInput(ord('A'), 0, KeyBdInput.KeyUp, 0, pointer(extra))
+# x = FInputs((Input.Mouse, click), (Input.Mouse, release), (Input.KeyBoard, keyD), (Input.KeyBoard, keyU))
+# user32.SendInput(4, pointer(x), sizeof(x[0]))
