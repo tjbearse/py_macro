@@ -94,7 +94,7 @@ def runSlow(items):
         l = [item]
         x = (Input * 1)(*l)
         user32.SendInput(1, pointer(x), sizeof(x[0]))
-        sleep(.2)
+        sleep(.005)
 
 # SAMPLE CODE
 #

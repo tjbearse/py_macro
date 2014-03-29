@@ -122,7 +122,7 @@ def ParseSeq(text, keys):
                     ParseSpec(text[i + 1: i + index], keys)
                     i = i + index
                 else:
-                    ParseChar(text[i], keys)
+                    ParseChar(text[i], keys)  # TODO: have shifting disabled?
             
             except IndexError:
                 raise ParseError("invalid escape sequence")
@@ -130,7 +130,6 @@ def ParseSeq(text, keys):
                 raise ParseError("mismatched braces '{ }' ")
             
         i += 1
-    print keys
 
 """ parse a special sequence
 SPEC => vkname/action (params)
@@ -157,7 +156,6 @@ def ParseChar(char, keys):
     shift = False  # TODO: get keyboard state
     if char == ' ':
         vkcode = vkCodes['SPACE']
-        print char, ' ', vkcode
         keys.append(mkKey(vk=vkcode, flag=0))
         keys.append(mkKey(vk=vkcode, flag=KeyBdInput.KeyUp))
     elif char in string.ascii_lowercase or char in string.digits:
@@ -165,21 +163,17 @@ def ParseChar(char, keys):
             keys.append(mkKey(vk=vkCodes['SHIFT'], flag=KeyBdInput.KeyUp))
             keys.append(mkKey(vk=ord(char.upper()), flag=0))
             keys.append(mkKey(vk=ord(char.upper()), flag=KeyBdInput.KeyUp))
-            print char, ' ', ord(char.upper())
         else:
             keys.append(mkKey(vk=ord(char.upper()), flag=0))
             keys.append(mkKey(vk=ord(char.upper()), flag=KeyBdInput.KeyUp))
-            print char, ' ', ord(char.upper())
     elif char in string.ascii_uppercase:
         if shift:
             keys.append(mkKey(vk=ord(char), flag=0))
             keys.append(mkKey(vk=ord(char), flag=KeyBdInput.KeyUp))
-            print char, ' ', ord(char)
         else:
             keys.append(mkKey(vk=vkCodes['SHIFT'], flag=0))
             keys.append(mkKey(vk=ord(char), flag=0))
             keys.append(mkKey(vk=ord(char), flag=KeyBdInput.KeyUp))
-            print char, ' ', ord(char)
     elif char in string.punctuation:
         # TODO: do punctuation
         print "punctuation char: ", char
@@ -190,19 +184,6 @@ def ParseQuote(text, keys):
     for c in text:
         ParseChar(c, keys)
 
-
-
-
-
-''' test ''' 
-# #ParseList("haha(1,oh (2 ,I g{space up}) you right \"there! the ans\" cont)what (2,yeah)(3,oh)", [])
-# items = list()
-# #ParseList("abcdefg", items)
-# ParseList("{alt down}{tab}{alt up}", items)
-# 
-# sleep(5)
-# #run(items)
-# runSlow(items)
 
 
 

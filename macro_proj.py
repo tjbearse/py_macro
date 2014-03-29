@@ -1,5 +1,7 @@
 import wx
 import SequenceListCtrl as sq
+from time import sleep
+import sendInputs as si
 
 class Pymacro(wx.App):
 	def OnInit(self):
@@ -100,7 +102,7 @@ class PymacroMainFrame(wx.Frame):
 		'''Run'''
 		self.run_btn = wx.Button(self.panel, label='Run')
 		self.run_btn.SetToolTipString('click to run macro')
-		self.run_btn.Bind(wx.EVT_BUTTON, self.OnRun, self)
+		self.run_btn.Bind(wx.EVT_BUTTON, self.OnRun, self.run_btn)
 		
 	def Panelize(self):
 		""" Arranges all elements in the main panel of the window """
@@ -155,7 +157,7 @@ class PymacroMainFrame(wx.Frame):
 		""" Insert a new row below the current selection """
 		index = self.scriptList.GetFirstSelected() + self.scriptList.GetSelectedItemCount()
 		if index == -1:
-			index = self.scriptList.GetItemCount()-1
+			index = self.scriptList.GetItemCount() - 1
 		self.scriptList.InsertNew(index)
 		
 	
@@ -214,7 +216,20 @@ class PymacroMainFrame(wx.Frame):
 	'''
 	
 	def OnRun(self, e):
-		''
+		print "running"
+		sec = self.delay_ctrl.Value
+		while sec != 0:
+			self.run_btn.SetLabel(str(sec))
+			sleep(1)
+			sec -= 1
+		self.run_btn.Unbind(wx.EVT_BUTTON)
+		for i in range(0, self.repeat_ctrl.GetValue()):
+			self.run_btn.SetLabel('...(' + str(i) + ')')
+ 			for row in self.scriptList.sequences:
+ 				print row.parsed
+ 				si.runSlow(row.parsed)
+		self.run_btn.Bind(wx.EVT_BUTTON, self.OnRun, self.run_btn)
+		self.run_btn.SetLabel('Run')
 		
 	# create the control buttons dialog
 	# this is to input control sequences into workspace

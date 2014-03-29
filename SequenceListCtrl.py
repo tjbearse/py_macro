@@ -66,12 +66,12 @@ class SequenceListCtrl(wx.ListCtrl, TextEditMixin, ListCtrlAutoWidthMixin):
         try:
             interp = Parse(event.GetText())
             event.Allow()
-            event.GetItem().parsed = interp
-            print "mod: ",interp
+            self.sequences[event.GetIndex()].parsed = interp
         except ParseError:
             print "error"
             event.Veto()
         if event.GetIndex() == len(self.sequences)-1:
-            self.InsertNew(len(self.sequences)) 
+            if len(self.sequences) - 2 < 0 or self.sequences[-2].text != '':
+                self.InsertNew(len(self.sequences)) 
                 
                 
