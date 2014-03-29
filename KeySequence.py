@@ -13,6 +13,7 @@ class ParseError(Exception):
 def Parse(text):
     l = list()
     ParseList(text, l)
+    return l
     
 
 ''' Grammar
@@ -32,27 +33,23 @@ TERM => SEQ | (REP)
 """
 def ParseList(text, keys):
     while len(text):
-        print "list: ", text
         if text[0] == '(':
             
             try:
-                index = GetParen(text)
+                index = GetRightParen(text)
             except ValueError:
                 raise ParseError('mismatched parens')
             ParseRep(text[1:index], keys)
             text = text[index + 1:]
         else:
-            try:
-                index = GetParen(text)
-            except ValueError:
-                index = len(text)
+            index = GetLeftParen(text)
             ParseSeq(text[0:index], keys)
             text = text[index:]
 
 """ returns index of first outer right paren
 requires matched parens
 """
-def GetParen(text):
+def GetRightParen(text):
     i = 0
     left_paren = 0
     while i < len(text):
@@ -68,11 +65,20 @@ def GetParen(text):
         i += 1
     raise ValueError
 
+def GetLeftParen(text):
+    i = 0
+    while i < len(text):
+        if text[i] == '\\':
+            i += 1
+        elif text[i] == '(':
+            return i
+        i += 1
+    return len(text)
+
 """
 REP => <num>, LIST
 """
 def ParseRep(text, keys):
-    print "rep: ", text
     try:
         index = text.index(',')
     except ValueError:
@@ -94,7 +100,6 @@ SEQ => ITEM SEQ | ITEM
 ITEM => {SPEC} | <alpha_num> | "QUOTE
 """
 def ParseSeq(text, keys):
-    print "seq: ", text
     i = 0
     while i < len(text):
         escaped = False
@@ -132,7 +137,6 @@ SPEC => vkname/action (params)
 """
 def ParseSpec(text, keys):
     words = (text.upper()).split()
-    print "spec: ", words
     if words[0] in vkCodes.keys():
         if len(words) > 1:
             if words[1] == "UP":
@@ -140,17 +144,17 @@ def ParseSpec(text, keys):
             elif words[1] == "DOWN":
                 keys.append(mkKey(vk=vkCodes[words[0]], flag=0))
             else:
-                raise ParseError("invalid option"+words[1])
+                raise ParseError("invalid option" + words[1])
         else:
             keys.append(mkKey(vk=vkCodes[words[0]], flag=0))
             keys.append(mkKey(vk=vkCodes[words[0]], flag=KeyBdInput.KeyUp))
     else:
-        raise ParseError("keyword "+words[0]+"?")
+        raise ParseError("keyword " + words[0] + "?")
 
 """ parse a character literally (no escapes etc)
 """
 def ParseChar(char, keys):
-    shift = False # TODO: get keyboard state
+    shift = False  # TODO: get keyboard state
     if char == ' ':
         vkcode = vkCodes['SPACE']
         print char, ' ', vkcode
@@ -177,13 +181,12 @@ def ParseChar(char, keys):
             keys.append(mkKey(vk=ord(char), flag=KeyBdInput.KeyUp))
             print char, ' ', ord(char)
     elif char in string.punctuation:
-        #TODO: do punctuation
+        # TODO: do punctuation
         print "punctuation char: ", char
     else:
         print "unknown char: ", char
 
 def ParseQuote(text, keys):
-    print "quote: ", text
     for c in text:
         ParseChar(c, keys)
 

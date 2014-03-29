@@ -63,14 +63,14 @@ class SequenceListCtrl(wx.ListCtrl, TextEditMixin, ListCtrlAutoWidthMixin):
         
     def OnModified(self, event):
         # validate
-        if event.GetColumn() == 1 :
-            try:
-                interp = Parse(event.GetText())
-                event.Allow()
-                event.GetItem().parsed = interp
-            except ParseError:
-                event.Veto()
-        print "made it", event.GetIndex()
+        try:
+            interp = Parse(event.GetText())
+            event.Allow()
+            event.GetItem().parsed = interp
+            print "mod: ",interp
+        except ParseError:
+            print "error"
+            event.Veto()
         if event.GetIndex() == len(self.sequences)-1:
             self.InsertNew(len(self.sequences)) 
                 
