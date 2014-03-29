@@ -10,6 +10,11 @@ class ParseError(Exception):
     def __str__(self):
         return repr(self.value)
 
+def Parse(text):
+    l = list()
+    ParseList(text, l)
+    
+
 ''' Grammar
 LIST => TERM LIST | TERM
 TERM => SEQ | (REP)
@@ -187,14 +192,14 @@ def ParseQuote(text, keys):
 
 
 ''' test ''' 
-#ParseList("haha(1,oh (2 ,I g{space up}) you right \"there! the ans\" cont)what (2,yeah)(3,oh)", [])
-items = list()
-#ParseList("abcdefg", items)
-ParseList("{alt down}{tab}{alt up}", items)
-
-sleep(5)
-#run(items)
-runSlow(items)
+# #ParseList("haha(1,oh (2 ,I g{space up}) you right \"there! the ans\" cont)what (2,yeah)(3,oh)", [])
+# items = list()
+# #ParseList("abcdefg", items)
+# ParseList("{alt down}{tab}{alt up}", items)
+# 
+# sleep(5)
+# #run(items)
+# runSlow(items)
 
 
 

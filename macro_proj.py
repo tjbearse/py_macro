@@ -1,5 +1,5 @@
 import wx
-from wx.lib.mixins.listctrl import TextEditMixin
+import SequenceListCtrl as sq
 
 class Pymacro(wx.App):
 	def OnInit(self):
@@ -10,56 +10,7 @@ class Pymacro(wx.App):
 
 
 
-# holds text and repetition count
-class KeySequenceHolder(object):
-	def __init__(self, rep, text):
-		self.repeat = int(rep)
-		self.text = text
-		
-		
-class SequenceListCtrl(wx.ListCtrl, TextEditMixin):
-	"""List style control for editing and displaying sequences of keys to run"""
-	def __init__(self, parent, ID, pos=wx.DefaultPosition,
-				size=wx.DefaultSize, style=0):
-		wx.ListCtrl.__init__(self, parent, ID, pos, size, style | wx.LC_VIRTUAL)
-		TextEditMixin.__init__(self) 
-				
-		self.sequences = [[]]
-		
-		self.SetItemCount(0)
-		
-		self.Bind(wx.EVT_LIST_END_LABEL_EDIT, self.OnModified, self)
 
-	''' methods '''
-	def InsertNew(self, index=0):
-		"""Inserts a new row, initialized to repeat=1 and blank sequence.
-			rows are zero indexed
-		"""
-		assert(0 <= index <= len(self.sequences))
-		self.sequences.insert(index, ())
-		self.SetItemCount(len(self.sequences))
-
-	def Delete(self, index):
-		"""Deletes the specified row (zero indexed)"""
-		assert(0 <= index <= self.GetItemCount())
-		self.DeleteItem(index)
-
-	'''Event Handlers'''
-		
-	def OnModified(self, event):
-		#validate
-		if event.GetColumn() == 1 :
-			try:
-				interp = Parse(event.GetText())
-				if interp is not None :
-					event.Allow()
-					#TODO: update sequence here
-				else:
-					event.Veto()
-			except ParseException:
-				event.Veto()
-		print "modified: ", event.GetColumn(), ' ', event.GetText()
-		
 		
 class PymacroMainFrame(wx.Frame):
 	def __init__(self, parent, title):
@@ -81,8 +32,12 @@ class PymacroMainFrame(wx.Frame):
 		filemenu = wx.Menu()
 		
 		menuAbout = filemenu.Append(wx.ID_ABOUT, "&About", " Info about this program")
+		self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
+
 		filemenu.AppendSeparator()
+		
 		menuExit = filemenu.Append(wx.ID_EXIT, "E&xit", " Close the program")
+		self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
 		
 
 		editmenu = wx.Menu()
@@ -92,9 +47,27 @@ class PymacroMainFrame(wx.Frame):
 		menu_insert_bottom = insertmenu.Append(wx.ID_ANY, "&Bottom", "Insert a row at the bottom of the list")
 		menu_insert_above = insertmenu.Append(wx.ID_ANY, "&Above Selected", "Insert a row above the selected row(s)")
 		menu_insert_below = insertmenu.Append(wx.ID_ANY, "B&elow Selected", "Insert a row below the selected row(s)")		
+		self.Bind(wx.EVT_MENU, self.OnInsertTop, menu_insert_top)
+		self.Bind(wx.EVT_MENU, self.OnInsertBottom, menu_insert_bottom)
+		self.Bind(wx.EVT_MENU, self.OnInsertAbove, menu_insert_above)
+		self.Bind(wx.EVT_MENU, self.OnInsertBelow, menu_insert_below)
+
 		editmenu.AppendMenu(wx.ID_ANY, "&Insert", insertmenu)
 		
+		
 		menuDelete = editmenu.Append(wx.ID_ANY, "&Delete", "Delete selected row(s)")
+		
+		movemenu = wx.Menu()
+		menu_move_top = movemenu.Append(wx.ID_ANY, "&Top", "Move selected to the top of the list")
+		menu_move_up = movemenu.Append(wx.ID_ANY, "&Up", "Move selected row up")
+		menu_move_down = movemenu.Append(wx.ID_ANY, "&Down", "Move selected row down")
+		menu_move_bottom = movemenu.Append(wx.ID_ANY, "&Bottom", "Move selected row down")
+		self.Bind(wx.EVT_MENU, self.OnMoveTop, menu_move_top)
+		self.Bind(wx.EVT_MENU, self.OnMoveUp, menu_move_up)
+		self.Bind(wx.EVT_MENU, self.OnMoveDown, menu_move_down)
+		self.Bind(wx.EVT_MENU, self.OnMoveBottom, menu_move_bottom)
+		
+		editmenu.AppendMenu(wx.ID_ANY, "&Move", movemenu)
 		
 		
 		menuBar = wx.MenuBar()
@@ -102,23 +75,13 @@ class PymacroMainFrame(wx.Frame):
 		menuBar.Append(editmenu, "&Edit")
 		self.SetMenuBar(menuBar)
 		
-		''' Bindings '''
-		self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
-		self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
-	
-		self.Bind(wx.EVT_MENU, self.OnInsertTop, menu_insert_top)
-		self.Bind(wx.EVT_MENU, self.OnInsertBottom, menu_insert_bottom)
-		self.Bind(wx.EVT_MENU, self.OnInsertAbove, menu_insert_above)
-		self.Bind(wx.EVT_MENU, self.OnInsertBelow, menu_insert_below)
-	
 		self.Bind(wx.EVT_MENU, self.OnDelete, menuDelete)
 		
 	def InitScriptList(self):
 		""" Initialize the list control containing the key sequences to run """
-		self.scriptList = SequenceListCtrl(self.panel, wx.ID_ANY,
+		self.scriptList = sq.SequenceListCtrl(self.panel, wx.ID_ANY,
 								style=wx.LC_REPORT | wx.LC_EDIT_LABELS | wx.LC_VRULES | wx.LC_HRULES)		
-		self.scriptList.InsertColumn(0, "Repetitions")
-		self.scriptList.InsertColumn(1, "Sequence")
+		self.scriptList.InsertColumn(0, "Sequence")
 		self.scriptList.InsertNew()
 		self.scriptList.Fit()
 			
@@ -171,10 +134,11 @@ class PymacroMainFrame(wx.Frame):
 	'''
 	Menu Event Handlers
 	'''
+		
+	''' INSERTS '''
 	def OnInsertBottom(self, e):
 		""" Insert a new row below the last row of the list control """
-		print self.scriptList.GetEditControl()
-		self.scriptList.InsertNew()
+		self.scriptList.InsertNew(self.scriptList.GetItemCount() - 1)
 		
 	def OnInsertTop(self, e):
 		""" Insert a new row above the first row of the list control """
@@ -183,15 +147,19 @@ class PymacroMainFrame(wx.Frame):
 	def OnInsertAbove(self, e):
 		""" Insert a new row above the current selection """
 		index = self.scriptList.GetFirstSelected()
-		if index == -1: # no selection
+		if index == -1:  # no selection
 			index = 0
 		self.scriptList.InsertNew(index)
 		
 	def OnInsertBelow(self, e):
 		""" Insert a new row below the current selection """
 		index = self.scriptList.GetFirstSelected() + self.scriptList.GetSelectedItemCount()
+		if index == -1:
+			index = self.scriptList.GetItemCount()-1
 		self.scriptList.InsertNew(index)
 		
+	
+	''' DELETES '''
 	def OnDelete(self, e):
 		""" Deletes the selected rows """
 		index = self.scriptList.GetFirstSelected()
@@ -200,6 +168,39 @@ class PymacroMainFrame(wx.Frame):
 		if self.scriptList.GetItemCount() == 0:
 			self.scriptList.InsertNew()
 		
+		
+	''' MOVES '''
+	def OnMoveUp(self, e):
+		index = self.scriptList.GetFirstSelected()
+		if index != -1 and index != 0 and index != self.scriptList.GetItemCount():
+			self.scriptList.Select(index, False)
+			self.scriptList.Move(index, index - 1)
+			self.scriptList.Select(index - 1, True)
+		
+	
+	def OnMoveDown(self, e):
+		index = self.scriptList.GetFirstSelected()
+		if index != -1 and index != self.scriptList.GetItemCount() - 1 and index != self.scriptList.GetItemCount():
+			self.scriptList.Select(index, False)
+			self.scriptList.Move(index, index + 1)
+			self.scriptList.Select(index + 1, True)
+
+	def OnMoveTop(self, e):
+		index = self.scriptList.GetFirstSelected()
+		if index != -1 and index != 0 and index != self.scriptList.GetItemCount():
+			self.scriptList.Select(index, False)
+			self.scriptList.Move(index, 0)
+			self.scriptList.Select(0, True)
+		
+	def OnMoveBottom(self, e):
+		index = self.scriptList.GetFirstSelected()
+		if index != -1 and index != self.scriptList.GetItemCount() - 1 and index != self.scriptList.GetItemCount():
+			self.scriptList.Select(index, False)
+			self.scriptList.Move(index, self.scriptList.GetItemCount() - 1)
+			self.scriptList.Select(self.scriptList.GetItemCount() - 2, True)
+		
+		
+	''' OTHER '''
 	def OnAbout(self, e):
 		dlg = wx.MessageDialog(self, "A small macro program written by TJ", "About Pymacro", wx.OK)
 		dlg.ShowModal()
