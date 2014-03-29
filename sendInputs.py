@@ -36,20 +36,32 @@ class MouseInput(Structure):
     XDown = 0x0080  # ??
     XUp = 0x0100  # ??
     
-    
+def mkKey(vk, flag=0):
+    keyIn = KeyBdInput(vk, flag)
+    input = InputU()
+    input.ki = keyIn
+    return Input(Input.KeyBoard, input) 
     
 class KeyBdInput(Structure):
     # http://msdn.microsoft.com/en-us/library/windows/desktop/ms646271(v=vs.85).aspx
     _fields_ = [('wVk', c_ushort),  # virtual key code
                 ('wScan', c_ushort),  # hardware scan code 
-                ('dwFlags', c_uint), 
+                ('dwFlags', c_uint),
                 ('time', c_uint),
                 ('dwExtraInfo', POINTER(c_ulong))]
+    def __init__ (self, vk, flag=0, scan=0, time=0):
+        self.wVk = vk
+        self.wScan = scan
+        self.dwFlags = flag
+        self.time = time
+        self.dwExtraInfo = pointer(self.NoExtra)
+        
     ''' dwFlags '''
-    ExtendedKey = 0x0001 # scan code preceded by 0xE0
-    KeyUp = 0x0002 # otherwise = down
-    ScanCode = 0x0008 # use wScan not wVk
-    Unicode = 0x004 # VK_PACKET keystroke?
+    ExtendedKey = 0x0001  # scan code preceded by 0xE0
+    KeyUp = 0x0002  # otherwise = down
+    ScanCode = 0x0008  # use wScan not wVk
+    Unicode = 0x004  # VK_PACKET keystroke?
+    NoExtra = c_ulong(0)
     
 class HardwareInput(Structure):
     # http://msdn.microsoft.com/en-us/library/windows/desktop/ms646269(v=vs.85).aspx
@@ -69,20 +81,35 @@ class Input(Structure):
     KeyBoard = 1
     Hardward = 2
     
+"""
+runs action simulation
+needs a list of items made with mkKey
+"""
+def run(items):
+    x = (Input * len(items))(*items)
+    user32.SendInput(len(items), pointer(x), sizeof(x[0]))
+
+def runSlow(items):
+    for item in items:
+        l = [item]
+        x = (Input * 1)(*l)
+        user32.SendInput(1, pointer(x), sizeof(x[0]))
+        sleep(.2)
+
 # SAMPLE CODE
 #
 # sleep(2)
 # FInputs = Input * 4
 # extra = c_ulong(0)
-#  
-#  
+#    
+#    
 # click = InputU()
 # click.mi = MouseInput(0, 0, 0, MouseInput.LDown, 0, pointer(extra))
 # release = InputU()
 # release.mi = MouseInput(0, 0, 0, MouseInput.LUp, 0, pointer(extra))
 # keyD = InputU()
-# keyD.ki = KeyBdInput(ord('A'), 0, 0, 0, pointer(extra))
+# keyD.ki = KeyBdInput(ord('A'), 0)
 # keyU = InputU()
-# keyU.ki = KeyBdInput(ord('A'), 0, KeyBdInput.KeyUp, 0, pointer(extra))
+# keyU.ki = KeyBdInput(ord('A'), KeyBdInput.KeyUp, 0, 0)
 # x = FInputs((Input.Mouse, click), (Input.Mouse, release), (Input.KeyBoard, keyD), (Input.KeyBoard, keyU))
 # user32.SendInput(4, pointer(x), sizeof(x[0]))
