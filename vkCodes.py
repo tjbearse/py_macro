@@ -92,8 +92,8 @@ Codes = {
 'RSHIFT':	0xA1,  # Right SHIFT key
 'LCONTROL':	0xA2,  # Left CONTROL key
 'RCONTROL':	0xA3,  # Right CONTROL key
-'LMENU':	0xA4,  # Left MENU key
-'RMENU':	0xA5,  # Right MENU key
+'LALT':	0xA4,  # Left MENU key
+'RALT':	0xA5,  # Right MENU key
 'BROWSER_BACK':	0xA6,  # Browser Back key
 'BROWSER_FORWARD':	0xA7,  # Browser Forward key
 'BROWSER_REFRESH':	0xA8,  # Browser Refresh key
@@ -143,7 +143,8 @@ Mouse = (
     ('RBUTTON', "Right mouse button"),
     ('MBUTTON', "Middle mouse button (three-button mouse)"),
     ('XBUTTON1', "X1 mouse button"),
-    ('XBUTTON2', "X2 mouse button")
+    ('XBUTTON2', "X2 mouse button"),
+    ('MVMouse', "Move the mouse")
     )
 
 Modifiers = (

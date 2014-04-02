@@ -3,10 +3,11 @@ from wx.lib.scrolledpanel import ScrolledPanel
 import vkCodes as vk
 import math
 
-class SpecialsDialog(wx.Frame):
-    def __init__(self, parent, id):        
-        wx.Frame.__init__(self, parent, id, "Special Items", size=(700, 500))
+class SpecialsDialog(wx.Dialog):
+    def __init__(self, parent, id, func):
+        wx.Dialog.__init__(self, parent, id, "Special Items", size=(700, 500))
         self.panel = ScrolledPanel(self, style=wx.VSCROLL)
+        self.OnButtonPress = func
         sizer = wx.BoxSizer(wx.VERTICAL)
         for name in vk.Names:
             CP = wx.CollapsiblePane(self.panel, -1, label=name[0])  
@@ -19,6 +20,7 @@ class SpecialsDialog(wx.Frame):
                 spec_btn = wx.Button(CP.GetPane(), -1, btn[0])
                 spec_btn.SetToolTipString(btn[1])
                 pansizer.Add(spec_btn, 0, wx.ALL)
+                spec_btn.Bind(wx.EVT_BUTTON, lambda evt, temp=btn[0]: self.OnButtonPress(evt, temp))
             pansizer.AddSpacer(10)
             win.SetSizer(pansizer)
             pansizer.SetSizeHints(win)
@@ -31,3 +33,4 @@ class SpecialsDialog(wx.Frame):
         # redo the layout
         self.panel.GetSizer().Layout()
         self.panel.FitInside()
+    

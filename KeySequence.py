@@ -138,12 +138,23 @@ def ParseSpec(text, keys):
     words = (text.upper()).split()
     if words[0] in vk.Codes.keys():
         if len(words) > 1:
-            if words[1] == "UP":
+            
+            if words[1] == "UP" or words[1] == "U":
                 keys.append(mkKey(vk=vk.Codes[words[0]], flag=KeyBdInput.KeyUp))
-            elif words[1] == "DOWN":
+            elif words[1] == "DOWN" or words[1] == "D":
                 keys.append(mkKey(vk=vk.Codes[words[0]], flag=0))
             else:
                 raise ParseError("invalid option" + words[1])
+            
+        elif len(words) > 2:
+            
+            if words[2] == "UP" or words[2] == "U":
+                keys.append(mkKey(vk=vk.Codes[words[0]], flag=KeyBdInput.KeyUp))
+            elif words[2] == "DOWN" or words[2] == "D":
+                keys.append(mkKey(vk=vk.Codes[words[0]], flag=0))
+            else:
+                raise ParseError("invalid option" + words[2])
+            
         else:
             keys.append(mkKey(vk=vk.Codes[words[0]], flag=0))
             keys.append(mkKey(vk=vk.Codes[words[0]], flag=KeyBdInput.KeyUp))
