@@ -20,6 +20,7 @@ class PymacroMainFrame(wx.Frame):
 		wx.Frame.__init__(self, parent, title=title, size=(400, 350))
 		self.panel = wx.Panel(self, wx.ID_ANY)
 
+		self.spec_dlg = SpecialsDialog(self, -1)
 		self.InitMenu()
 		self.InitScriptList()
 		self.InitButtons()
@@ -212,9 +213,7 @@ class PymacroMainFrame(wx.Frame):
 		
 	''' OTHER '''
 	def OnShowCustomDialog(self, event):
-		dia = SpecialsDialog(self, -1)
-		dia.ShowModal()
-		dia.Destroy()
+		self.spec_dlg.Show()
 	
 	def OnAbout(self, e):
 		dlg = wx.MessageDialog(self, "A small macro program written by TJ", "About Pymacro", wx.OK)
@@ -238,17 +237,13 @@ class PymacroMainFrame(wx.Frame):
 		self.run_btn.Unbind(wx.EVT_BUTTON)
 		for i in range(0, self.repeat_ctrl.GetValue()):
 			self.run_btn.SetLabel('...(' + str(i) + ')')
- 			for row in self.scriptList.sequences:
- 				print row.parsed
- 				si.runSlow(row.parsed)
+			for row in self.scriptList.sequences:
+				print row.parsed
+				si.runSlow(row.parsed)
 		self.run_btn.Bind(wx.EVT_BUTTON, self.OnRun, self.run_btn)
 		self.run_btn.SetLabel('Run')
 		
-	# create the control buttons dialog
-	# this is to input control sequences into workspace
-	def initControlDialog(self):  # TODO: rename to mod
-		""" this dialog holds buttons that will add the corresponding modifier to the sequence """
-		None
+
 
 
 app = Pymacro(False)
