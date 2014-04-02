@@ -1,5 +1,5 @@
 
-from vkCodes import vkCodes
+import vkCodes as vk
 from sendInputs import mkKey, KeyBdInput, run, runSlow
 import string
 from time import sleep
@@ -136,17 +136,17 @@ SPEC => vkname/action (params)
 """
 def ParseSpec(text, keys):
     words = (text.upper()).split()
-    if words[0] in vkCodes.keys():
+    if words[0] in vk.Codes.keys():
         if len(words) > 1:
             if words[1] == "UP":
-                keys.append(mkKey(vk=vkCodes[words[0]], flag=KeyBdInput.KeyUp))
+                keys.append(mkKey(vk=vk.Codes[words[0]], flag=KeyBdInput.KeyUp))
             elif words[1] == "DOWN":
-                keys.append(mkKey(vk=vkCodes[words[0]], flag=0))
+                keys.append(mkKey(vk=vk.Codes[words[0]], flag=0))
             else:
                 raise ParseError("invalid option" + words[1])
         else:
-            keys.append(mkKey(vk=vkCodes[words[0]], flag=0))
-            keys.append(mkKey(vk=vkCodes[words[0]], flag=KeyBdInput.KeyUp))
+            keys.append(mkKey(vk=vk.Codes[words[0]], flag=0))
+            keys.append(mkKey(vk=vk.Codes[words[0]], flag=KeyBdInput.KeyUp))
     else:
         raise ParseError("keyword " + words[0] + "?")
 
@@ -155,12 +155,12 @@ def ParseSpec(text, keys):
 def ParseChar(char, keys):
     shift = False  # TODO: get keyboard state
     if char == ' ':
-        vkcode = vkCodes['SPACE']
+        vkcode = vk.Codes['SPACE']
         keys.append(mkKey(vk=vkcode, flag=0))
         keys.append(mkKey(vk=vkcode, flag=KeyBdInput.KeyUp))
     elif char in string.ascii_lowercase or char in string.digits:
         if shift:
-            keys.append(mkKey(vk=vkCodes['SHIFT'], flag=KeyBdInput.KeyUp))
+            keys.append(mkKey(vk=vk.Codes['SHIFT'], flag=KeyBdInput.KeyUp))
             keys.append(mkKey(vk=ord(char.upper()), flag=0))
             keys.append(mkKey(vk=ord(char.upper()), flag=KeyBdInput.KeyUp))
         else:
@@ -171,7 +171,7 @@ def ParseChar(char, keys):
             keys.append(mkKey(vk=ord(char), flag=0))
             keys.append(mkKey(vk=ord(char), flag=KeyBdInput.KeyUp))
         else:
-            keys.append(mkKey(vk=vkCodes['SHIFT'], flag=0))
+            keys.append(mkKey(vk=vk.Codes['SHIFT'], flag=0))
             keys.append(mkKey(vk=ord(char), flag=0))
             keys.append(mkKey(vk=ord(char), flag=KeyBdInput.KeyUp))
     elif char in string.punctuation:

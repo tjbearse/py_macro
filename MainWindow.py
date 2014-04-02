@@ -1,5 +1,6 @@
 import wx
 import SequenceListCtrl as sq
+from SpecialsDialog import SpecialsDialog
 from time import sleep
 import sendInputs as si
 
@@ -89,6 +90,10 @@ class PymacroMainFrame(wx.Frame):
 			
 	def InitButtons(self):
 		""" Initialize the upper controls, Run, Delay and Repeat """
+		'''Special'''
+		self.spec_btn = wx.Button(self.panel, label='Spec')
+		self.spec_btn.SetToolTipString('click to add a special item')
+		self.spec_btn.Bind(wx.EVT_BUTTON, self.OnShowCustomDialog, self.spec_btn)
 		'''Repeat'''
 		self.repeat_label = wx.StaticText(self.panel, label='Repeat')
 		self.repeat_ctrl = wx.SpinCtrl(self.panel, initial=1, size=(50, -1))
@@ -108,6 +113,9 @@ class PymacroMainFrame(wx.Frame):
 		""" Arranges all elements in the main panel of the window """
 		
 		innerbox = wx.BoxSizer(wx.HORIZONTAL)
+		innerbox.Add(self.spec_btn, proportion=0,
+					flag=wx.LEFT | wx.RIGHT | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL,
+					border=10)
 		''' Repeat '''
 		innerbox.Add(self.repeat_label, proportion=0,
 					flag=wx.LEFT | wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
@@ -203,6 +211,11 @@ class PymacroMainFrame(wx.Frame):
 		
 		
 	''' OTHER '''
+	def OnShowCustomDialog(self, event):
+		dia = SpecialsDialog(self, -1)
+		dia.ShowModal()
+		dia.Destroy()
+	
 	def OnAbout(self, e):
 		dlg = wx.MessageDialog(self, "A small macro program written by TJ", "About Pymacro", wx.OK)
 		dlg.ShowModal()
