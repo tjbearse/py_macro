@@ -6,11 +6,11 @@ import math
 class SpecialsDialog(wx.Dialog):
     def __init__(self, parent, id, func):
         wx.Dialog.__init__(self, parent, id, "Special Items", size=(700, 500))
-        self.panel = ScrolledPanel(self, style=wx.VSCROLL)
+        self.mainPanel = ScrolledPanel(self, style=wx.VSCROLL)
         self.OnButtonPress = func
         sizer = wx.BoxSizer(wx.VERTICAL)
         for name in vk.Names:
-            CP = wx.CollapsiblePane(self.panel, -1, label=name[0])  
+            CP = wx.CollapsiblePane(self.mainPanel, -1, label=name[0])  
             CP.Bind(wx.EVT_COLLAPSIBLEPANE_CHANGED, self.OnPaneChanged)       
             win = CP.GetPane()        
             rows = math.ceil(len(name[1]) / 5.0) + 1
@@ -25,12 +25,13 @@ class SpecialsDialog(wx.Dialog):
             win.SetSizer(pansizer)
             pansizer.SetSizeHints(win)
             sizer.Add(CP, 0, wx.RIGHT | wx.LEFT | wx.EXPAND, 5)
-        self.panel.SetSizerAndFit(sizer)
-        self.panel.SetupScrolling(False, True)
+        self.mainPanel.SetSizerAndFit(sizer)
+        self.mainPanel.SetupScrolling(False, True)
 
-        
+
+    
     def OnPaneChanged(self, evt):
         # redo the layout
-        self.panel.GetSizer().Layout()
-        self.panel.FitInside()
+        self.mainPanel.GetSizer().Layout()
+        self.mainPanel.FitInside()
     

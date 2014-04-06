@@ -1,10 +1,5 @@
 Codes = {
-'LBUTTON':	0x01,  # Left mouse button
-'RBUTTON':	0x02,  # Right mouse button
 'CANCEL':	0x03,  # Control-break processing
-'MBUTTON':	0x04,  # Middle mouse button (three-button mouse)
-'XBUTTON1':	0x05,  # X1 mouse button
-'XBUTTON2':	0x06,  # X2 mouse button
 'BACK':	0x08,  # BACKSPACE key
 'TAB':	0x09,  # TAB key
 'CLEAR':	0x0C,  # CLEAR key
@@ -136,7 +131,7 @@ Codes = {
 'PA1':	0xFD  # PA1 key
 }
 
-
+SeqTemplate = ('{')
 
 Mouse = (
     ('LBUTTON', "Left mouse button"),
